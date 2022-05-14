@@ -6,12 +6,50 @@ body{
     background-size: cover;
     background-position: center;
     background-attachment: fixed;
-    width: 80%;
+    width: 1200px;
     border: 4px solid #fff;
     font-family: source sans Pro, sans-serif;
     padding: 20px;
     margin: 20px auto;
-    max-width: 700px;
+    max-width: 1500px;
+}
+nav{
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+    background: #0082e6;
+    height: 150px;
+    width: 100%;
+}
+label.logo{
+    color: white;
+    font-size: 35px;
+    line-height: 50px;
+    padding: 0 100px;
+    font-weight: bold;
+}
+nav ul{
+    float: right;
+    margin-right: 20px;
+}
+nav ul li{
+    display: inline-block;
+    line-height: 80px;
+    margin: 0 5px;
+}
+nav ul li a{
+    color: white;
+    font-size: 17px;
+    padding: 7px 13px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    text-decoration: solid;
+}
+a.active,a:hover{
+    background: #1b9bff;
+    transition: .5s;
 }
 .blog{
     margin-bottom: 20px;
