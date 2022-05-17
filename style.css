@@ -88,17 +88,30 @@ p{
     font-weight: 600;
 }
 
+.contactpic{
+    float: ;
+}
+
 .LinkedIn{
+    color: white;
     width: 50px;
-    float: right;
+    float: middle;
     margin-top: 100px;
+    margin-right: 50px;
+    margin-bottom: ;
 }
 
 .email{
     width: 45px;
     height: 45px;
-    float: right;
+    float: middle;
     border-style: solid;
     border-radius: 5px;
-    border-color: white;
+    border-color: whitesmoke;
+    background-color: white;
+}
+
+.space{
+    margin-top: 100px;
+  
 }
