@@ -1,8 +1,3 @@
-FROM node:alpine
-
-WORKDIR '/webapp'
-
-COPY . .
-
-
-
+FROM nginx: ubuntu
+COPY . /var/www/html
+EXPOSE 80
