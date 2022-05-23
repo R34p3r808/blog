@@ -1,3 +1,3 @@
-FROM nginx: ubuntu
+FROM nginx
 COPY . /var/www/html
 EXPOSE 80
