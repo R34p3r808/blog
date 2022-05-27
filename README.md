@@ -17,8 +17,11 @@ In order to build a docker container you need to start with a "Dockerfile" that 
 **This is my current Dockerfile:**
 
 FROM nginx 
+
 COPY index.html /usr/share/nginx/html/index.html
+
 COPY . /usr/share/nginx/html/
+
 EXPOSE 80
 
 Each line represents a configuration that will be implemented when you run the "docker build" command.  I am creating a container that is based off of the ngnix image hosted on the Docker repository.  This will give me the base image needed to host the website.  Ensure that you COPY your index.html file into the /usr/share/nginx/html/index.html of the container.  This will replace the index.html file that is already in the ngnix container.  If you don't do this, you risk the container showing the basic splash index.html that pops up on a standard ngnix server.  This is a main reason that certain people may have an issue with their website showing THEIR index.html.
