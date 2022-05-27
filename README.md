@@ -8,7 +8,7 @@ I plan on adding an AWS WAF and potentially testing AWS Guardduty in a few proje
 
 This project is going to eventually focus on mostly cloud security as that is my end goal! Let's have some fun and hopefully you enjoy following me through my journey from start to finish!
 
-**Making a Dockerfile**
+**#Making a Dockerfile**
 
 First, it is recommended to make a docker hub profile to ensure that you have access to a list of the prebuilt docker images such as the nginx image that I am using.  This will also give you the opportunity to host your own repository that you can make private or public, just like github.
 
