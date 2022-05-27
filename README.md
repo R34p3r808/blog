@@ -14,7 +14,7 @@ First, it is recommended to make a docker hub profile to ensure that you have ac
 
 In order to build a docker container you need to start with a "Dockerfile" that will give some instructions on how the container should be built.
 
-This is my current Dockerfile:
+**This is my current Dockerfile:**
 
 FROM nginx 
 COPY index.html /usr/share/nginx/html/index.html
@@ -27,19 +27,23 @@ After this, you want to ensure that you COPY all files in the current directory 
 
 The last command will ensure that port 80 is exposed to the CONTAINER.  This does not expose the host machine port.  We can customize which port we want to use on the host machine through the "docker build" command on the linux command line.  You can also use a docker-compose.yml file that would allow you to fine tune your volumes and port numbers as well.  Docker-compose is an orchestrator for containers but since we will be using kubernetes to do our orchestration on AWS, I won't be doing a deep delve into that as of yet.
 
-**Docker build**
+**#Docker build**
+ 
+The command: docker build -t keitzkyle/blog:v1 .
 
-After you have made your website (mine is not yet complete) and built your Dockerfile within the same directory of your website, you can test out your container to ensure that docker is working for you. I am working with Ubuntu 22.04 and I have VSCode installed on the virtual Ubuntu machine as well.  Ensure that you have a copy of your website on the linux box and that you are working from the directory that the website and dockerfile are hosted on the CLI.
+Explanation: After you have made your website (mine is not yet complete) and built your Dockerfile within the same directory of your website, you can test out your container to ensure that docker is working for you. I am working with Ubuntu 22.04 and I have VSCode installed on the virtual Ubuntu machine as well.  Ensure that you have a copy of your website on the linux box and that you are working from the directory that the website and dockerfile are hosted on the CLI.
 
 Once you are in the correct directory within the CLI, you can run the "docker build -t keitzkyle/blog:v1 ." command.  Ensure that you put the "." at the end to tell docker that you would like the container build to happen in the current directory.  Now, the last part of your command is going to be a bit different.  The name of my docker profile is keitzkyle and I am naming the docker container blog:v1.  The "v1" part is just the tag name.  It is essentially a subcategory of the "blog" repo.  If you eventually push out a v2, you can keep the two builds seperate.  You can push your builds to your docker repo for redundancy with the "docker push keitzkyle/blog:tagname".  Replace the command with your own profile and build name.
 
 When you run the build command you will start to see the build take place.  You will see the commands that you inserted into the Dockerfile take place and the container should be built within seconds.  You still wont be able to see your website because although the container is built, it is not yet running.
 
-**Docker run**
+**#Docker run**
 
-Make sure you are still in the same directory as your website and docker build file.  Type in "docker run -p 8080:80 keitzkyle/blog:v1".  Ensure that you are replacing the build name and tag with your own.  This is going to expose port 8080 of the HOST machine and direct it to port 80 of the container.  You do not have to use port 8080, you can realistically use any port that your machine isn't currently using.  To check which ports your machine is using, you can use the "netstat" or "netstat -ano" command and you can actively see which ports are already listening or established.
+The command: docker run -p 8080:80 keitzkyle/blog:v1
+
+Explanation: Make sure you are still in the same directory as your website and docker build file.  Type in "docker run -p 8080:80 keitzkyle/blog:v1".  Ensure that you are replacing the build name and tag with your own.  This is going to expose port 8080 of the HOST machine and direct it to port 80 of the container.  You do not have to use port 8080, you can realistically use any port that your machine isn't currently using.  To check which ports your machine is using, you can use the "netstat" or "netstat -ano" command and you can actively see which ports are already listening or established.
 
 After you run the command, you should be able to use whatever browser you choose and type in either "localhost:8080" or "127.0.0.1:8080".  Your containerized application should appear and act as normal!
 
 
-**Kubernetes installation on AWS**
+**#Kubernetes installation on AWS**
