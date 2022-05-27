@@ -46,10 +46,33 @@ Explanation: Make sure you are still in the same directory as your website and d
 After you run the command, you should be able to use whatever browser you choose and type in either "localhost:8080" or "127.0.0.1:8080".  Your containerized application should appear and act as normal!
 
 
-**#Kubernetes installation on AWS**
+**#Starting ec2 instances for Kubernetes on AWS**
 
 In order to do this, you'll have to have a basic understanding of IAM and security groups on AWS.  You will want to ensure that the ec2 instances that are launched can speak to each other.  You will also need to ensure that you have the correct key pair in order to connect to your linux machine securely.  You will have the option to choose the key pair that you would like to use during the spin up of your ec2 instance.  
 
 The bad news: there are no ec2 instances that you can currently use for free for a kubernetes cluster.  Kubernetes requires at least 2 CPUs and 2 GB of RAM/Memory or you will get a ton of errors during the first command when you create the master node in the cluster....I may or may not have found this out the hard way :(.  I have been using Ubuntu instances built on a t3.small and this only charges about 2 cents an hour.  I did the math and it would essentially cost about 15 dollars a month to run this master node.  Even if you had to run 3 of these nodes, it would be 45 dollars a month which still beats the price of Elastic Kubernetes Service (EKS) at about 70-75 dollars a month for 1 kubernetes (k8) cluster.  There is also another option you could use (Linode) who provides you a 100 dollars of free credits to use their k8 cluster at 30 dollars a month (cheapest option).  Personally, I wanted to build the cluster from the ground up and debug if I had to, to really understand how Kubernetes works.  Eventually, I may switch to Linode and use their clusters since they are a bit cheaper and they seem to work right out of the box.
 
 Get to the point, Kyle: Alright, so once you have 3 ec2 instances running, you will want to remote into them via SSH.  I used putty to do so, if you are doing the same then make sure you download the .ppk version of your key pair and not the .pem version.  The former works well with putty. Ensure that all security groups are allowed to speak to each other, you won't have to do this if you create your ec2 instances at the same time since they will all be in the same ec2 instance.  Ensure that inbound traffic is allowed from the same security group.  The reason you want to do this is because Kubernetes or the kubectl command will use port 6443 by default.  It needs to be able to check on that port on it's own IP address to reach the Kubernetes API.  If a security group is blocking return inbound traffic from itself, you may get an error message that states that it could not reach the "ip address at port 6443" or something along those lines.
+
+**#Installing Kubernetes and Docker on ec2**
+
+After you have logged into all of the instances you will want to run a few commands (all of these can be found on the official Kubernetes site: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/):
+
+#Update linux
+sudo apt-get update
+
+#install curl
+sudo apt-get install -y apt-transport-https ca-certificates curl
+
+#Install gpg keys
+sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
+
+#Add the Kubernetes apt repository
+echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
+
+#Run update and install kubelet, kubeadm, and kubectl
+sudo apt-get update
+sudo apt-get install -y kubelet kubeadm kubectl
+
+#Hold the new tools (this will prevent accidental updates to these tools that may cause your cluster to break)
+sudo apt-mark hold kubelet kubeadm kubectl
