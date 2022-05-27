@@ -80,6 +80,7 @@ echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https:/
 #Run update and install kubelet, kubeadm, and kubectl
 
 sudo apt-get update
+
 sudo apt-get install -y kubelet kubeadm kubectl
 
 #Hold the new tools (this will prevent accidental updates to these tools that may cause your cluster to break)
