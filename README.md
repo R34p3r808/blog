@@ -58,22 +58,28 @@ Get to the point, Kyle: Alright, so once you have 3 ec2 instances running, you w
 
 After you have logged into all of the instances you will want to run a few commands (all of these can be found on the official Kubernetes site: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/):
 
-#update linux     
+#update linux    
+
 sudo apt-get update
 
 #install curl
+
 sudo apt-get install -y apt-transport-https ca-certificates curl
 
 #Install gpg keys
+
 sudo curl -fsSLo /usr/share/keyrings/kubernetes-archive-keyring.gpg https://packages.cloud.google.com/apt/doc/apt-key.gpg
 
 #Add the Kubernetes apt repository
+
 echo "deb [signed-by=/usr/share/keyrings/kubernetes-archive-keyring.gpg] https://apt.kubernetes.io/ kubernetes-xenial main" | sudo tee /etc/apt/sources.list.d/kubernetes.list
 
 #Run update and install kubelet, kubeadm, and kubectl
+
 sudo apt-get update
 sudo apt-get install -y kubelet kubeadm kubectl
 
 #Hold the new tools (this will prevent accidental updates to these tools that may cause your cluster to break)
+
 sudo apt-mark hold kubelet kubeadm kubectl
- </copy-button>
+
