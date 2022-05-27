@@ -83,3 +83,5 @@ sudo apt-get install -y kubelet kubeadm kubectl
 
 sudo apt-mark hold kubelet kubeadm kubectl
 
+
+**To be continued, ran out of time for the day 😥**
