@@ -58,8 +58,7 @@ Get to the point, Kyle: Alright, so once you have 3 ec2 instances running, you w
 
 After you have logged into all of the instances you will want to run a few commands (all of these can be found on the official Kubernetes site: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/):
 
-<copy-button>
- #Update linux
+#update linux     
 sudo apt-get update
 
 #install curl
