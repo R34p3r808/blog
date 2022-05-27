@@ -58,7 +58,8 @@ Get to the point, Kyle: Alright, so once you have 3 ec2 instances running, you w
 
 After you have logged into all of the instances you will want to run a few commands (all of these can be found on the official Kubernetes site: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/install-kubeadm/):
 
-#Update linux
+<copy-button>
+ #Update linux
 sudo apt-get update
 
 #install curl
@@ -76,3 +77,4 @@ sudo apt-get install -y kubelet kubeadm kubectl
 
 #Hold the new tools (this will prevent accidental updates to these tools that may cause your cluster to break)
 sudo apt-mark hold kubelet kubeadm kubectl
+ </copy-button>
