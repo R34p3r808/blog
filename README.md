@@ -8,6 +8,36 @@ I plan on adding an AWS WAF and potentially testing AWS Guardduty in a few proje
 
 This project is going to eventually focus on mostly cloud security as that is my end goal! Let's have some fun and hopefully you enjoy following me through my journey from start to finish!
 
+**#Inintializing Ubuntu**
+
+First and foremost you should ensure that your Ubuntu machine has the newest upgrades/updates & patches.
+
+Command: sudo apt-get update && upgrade
+
+**#Installing Docker**
+
+To install docker for the first time you can follow the instructions on the website or just follow the commands here.  If you have an older version of docker you may want to remove it first with: **sudo apt-get remove docker docker-engine docker.io containerd runc**
+
+Commands:
+1. sudo apt-get install \
+    ca-certificates \
+    curl \
+    gnupg \
+    lsb-release
+
+2. sudo mkdir -p /etc/apt/keyrings
+
+3. curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+
+4. echo \
+  "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+  $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+
+5. sudo apt-get update
+
+6. sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+
+
 **#Making a Dockerfile**
 
 First, it is recommended to make a docker hub profile to ensure that you have access to a list of the prebuilt docker images such as the nginx image that I am using.  This will also give you the opportunity to host your own repository that you can make private or public, just like github.
