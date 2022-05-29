@@ -183,15 +183,15 @@ My command (yours will be different):
 kubeadm join 192.168.0.30:6443 --token 0qp665.hrx7vdzhzu6wt1c6 \
 	--discovery-token-ca-cert-hash sha256:8354343d2d4140a61f0d8d5303d47c5f24bc946ee25b39fd1c73690da0c2adab
 
-Sometimes you may have connectivity issues and the API can be a little inconsistent at times.  To check on the kubernets services, use the following command:
+Sometimes you may have connectivity issues and the API can be a little inconsistent at times.  To check on the kubernetes services, use the following command:
 
 **kubectl get pods -n kube-system**
 
 To check logs for errors:
 
-kubectl logs -n kube-system kube-controller-manager-k8s-master
+kubectl logs -n (name of service, for example:) kube-system kube-controller-manager-k8s-master
 
-sudo journalctl -u kubelet -n 100 --no-pager (Usually helpful if the kubelet service keeps failing)
+sudo journalctl -u kubelet -n 100 --no-pager (Usually helpful if the kubelet or API service keeps failing)
 
 
 
