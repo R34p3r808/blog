@@ -4,11 +4,13 @@ This is an AWS project that will extend into a pipeline.  I am not exactly a cod
 
 This pipeline will be relatively simple but it will represent my understanding of CI/CD and potentially IaC.  I will most likely be wrapping this website into a docker image that will be administered through kubernetes to show some of my understanding there.
 
-I plan on adding an AWS WAF and potentially testing AWS Guardduty in a few projects that I will blog about on the website.
+I plan on adding an AWS WAF and potentially testing AWS Guardduty in a few projects that I will blog about on the website.  I will also be installing SNORT on an ec2 within the same network to monitor traffic and potentially forward the alerts/logs to a syslog-ng server.
 
 This project is going to eventually focus on mostly cloud security as that is my end goal! Let's have some fun and hopefully you enjoy following me through my journey from start to finish!
 
 **#Inintializing Ubuntu**
+
+For the intention of ensuring that my website is working within a docker container I will be using docker on an Ubuntu virtual machine instead of an ec2 instance on AWS.  It's easier to spin it up locally first rather than trying to debug any errors on AWS.
 
 First and foremost you should ensure that your Ubuntu machine has the newest upgrades/updates & patches.
 
@@ -117,5 +119,89 @@ sudo apt-get install -y kubelet kubeadm kubectl
 
 sudo apt-mark hold kubelet kubeadm kubectl
 
+#Network plugin to ensure that the nodes can speak and be in a "ready" state
 
-**To be continued, ran out of time for the day 😥**
+On all nodes, including master: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+
+
+In order to install docker, you can follow the same steps required to install docker on your Ubuntu machine, above.
+
+
+**#Initializing the Kubernetes cluster**
+
+On the machine that you deem the master node, run the following commands.
+
+I typically run these kubernetes cluster commands as root.  You can do it as a regular user as well.  *sudo su -* should be used to login as root.
+
+Command: export MASTER_IP=<IP_of_Master_Node>
+
+Command: kubeadm init --apiserver-advertise-address=${MASTER_IP} --pod-network-cidr=10.244.0.0/16
+
+Explanation: Essentially, the export command is creating the MASTER_IP variable which is inserted into the next command.  The second command is responsible for creating a new cluster subnet.  This has no bearing on the host IP address.
+
+#Debugging/Troubleshooting 'kubeadm init'
+
+Sometimes upon initializing the kubernetes cluster, we get container runtime errors and or swap errors.  Kubernetes relies on containerd as a service to run and it this service isn't restarted, sometimes it can hold the command up.
+
+The fix for CRI errors: 
+
+rm /etc/containerd/config.toml
+systemctl restart containerd
+
+The fix for kubelet swap errors:
+
+Temporary fix --> swapoff -a
+Permanent fix --> sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+
+After this, you should be able to run the whole 'kubeadm init' command without problem.
+
+**#Joining nodes to kubernetes cluster**
+
+After you fix any errors you may have gotten (sometimes they are plentiful *sad*) you will be given a 'kubeadm join' command with the IP address of your master node.  The 6443 port is so the nodes can reach back to the API hosted on the master.
+
+
+THIS PART IS VERY IMPORTANT!!!!!
+
+ENSURE that you follow the instructions given above the 'kubeadm join' command.  If you DO NOT, then you will not be able to use the 'kubectl get nodes' command with any kind of success.
+
+If you are root:
+
+export KUBECONFIG=/etc/kubernetes/admin.conf
+
+If you are a regular user:
+
+ mkdir -p $HOME/.kube
+  sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
+  sudo chown $(id -u):$(id -g) $HOME/.kube/config
+
+If you do this right the first time, it will save you a whole lot of headache. Basically, these commands are pointing to the admin.conf file where the configuration for your kubernetes cluster lies. If you don't run these commands you will consistently get errors that say something like "Localhost:8080 -> could not connect to host".  Without the 'admin.conf' file, kubectl doesn't know where to look and it should be pointing to your host IP at port 6443, NOT 8080.
+
+Now you can paste the 'kubeadm join' command to the kubernetes nodes.
+
+My command (yours will be different):
+
+kubeadm join 192.168.0.30:6443 --token 0qp665.hrx7vdzhzu6wt1c6 \
+	--discovery-token-ca-cert-hash sha256:8354343d2d4140a61f0d8d5303d47c5f24bc946ee25b39fd1c73690da0c2adab
+
+Sometimes you may have connectivity issues and the API can be a little inconsistent at times.  To check on the kubernets services, use the following command:
+
+**kubectl get pods -n kube-system**
+
+To check logs for errors:
+
+kubectl logs -n kube-system kube-controller-manager-k8s-master
+
+sudo journalctl -u kubelet -n 100 --no-pager (Usually helpful if the kubelet service keeps failing)
+
+
+
+
+
+
+
+
+
+
+
+
+
