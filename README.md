@@ -193,6 +193,10 @@ kubectl logs -n (name of service, for example:) kube-system kube-controller-mana
 
 sudo journalctl -u kubelet -n 100 --no-pager (Usually helpful if the kubelet or API service keeps failing)
 
+To find pods that are crashing: kubectl get pods -n kube-system | grep -i crash
+
+To find the error message: kubectl describe pod <pod_name> -n kube-system
+
 
 
 
