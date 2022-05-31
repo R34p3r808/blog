@@ -126,6 +126,11 @@ On all nodes, including master: kubectl apply -f https://raw.githubusercontent.c
 
 In order to install docker, you can follow the same steps required to install docker on your Ubuntu machine, above.
 
+**#Enable the use of iptables on ALL nodes (including master)**
+
+echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
+sudo sysctl -p
+
 
 **#Initializing the Kubernetes cluster**
 
