@@ -197,6 +197,18 @@ To find pods that are crashing: kubectl get pods -n kube-system | grep -i crash
 
 To find the error message: kubectl describe pod <pod_name> -n kube-system
 
+**#Deploying Pods**
+In order to deploy pods, you will need to create a yaml file that will describe the containers that run inside.  You can do a quick one off pod creation with the **kubectl run blog --image=keitzkyle/blog:v1 -port 80** but this will only give you one single container image within one pod.
+
+Yaml may be frightening at first but it will actually manage the deployment in a more "automated" fashion.  Please take a look at my 'blog_deployment.yaml' to see the contents inside.
+
+To deploy this file, on the master:
+
+**kubectl apply -f blog_deployment.yaml"**
+
+This will deploy all of the pods that are requested in the file (3) and pull the website image from my docker repository.
+
+
 
 
 
