@@ -10,7 +10,7 @@ This project is going to eventually focus on mostly cloud security as that is my
 
 **#Inintializing Ubuntu**
 
-For the intention of ensuring that my website is working within a docker container I will be using docker on an Ubuntu virtual machine instead of an ec2 instance on AWS.  It's easier to spin it up locally first rather than trying to debug any errors on AWS.
+For the intention of ensuring that my website is working within a docker container I will be using docker on an Ubuntu virtual machine instead of an ec2 instance on AWS.  It's easier to spin it up locally first rather than trying to debug any errors on AWS.  I will be using Ubuntu 18.04, I tried 22.04 and that version does not seem to play well with the new Docker and Kubeadm versions.  The containers/pods constantly crashed and after troubleshooting for hours, it seemed to be easier to go with 18.04 until the issues are smoothed out.
 
 First and foremost you should ensure that your Ubuntu machine has the newest upgrades/updates & patches.
 
