@@ -1,0 +1,22 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: kloudblog-deployment
+  labels:
+    app: blog
+spec:
+  replicas: 3
+  selector:
+    matchLabels:
+      app: blog
+  template:
+    metadata:
+      labels:
+        app: blog
+    spec:
+      containers:
+      - name: static-site
+        image: keitzkyle/blog:v1
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 80
