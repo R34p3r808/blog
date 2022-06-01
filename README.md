@@ -121,7 +121,7 @@ sudo apt-mark hold kubelet kubeadm kubectl
 
 #Network plugin to ensure that the nodes can speak and be in a "ready" state
 
-On all nodes, including master: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
+On master node: kubectl apply -f https://raw.githubusercontent.com/coreos/flannel/master/Documentation/kube-flannel.yml
 
 
 In order to install docker, you can follow the same steps required to install docker on your Ubuntu machine, above.
