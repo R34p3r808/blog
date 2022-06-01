@@ -1,2 +1,0 @@
-kubeadm join 192.168.30.43:6443 --token jpkfqg.2cs5bc66cir1cl4o \
-	--discovery-token-ca-cert-hash sha256:838616ee5c758e8120d8db82c3f296b2995195cb27fb9a5755cd4832b240ce89
