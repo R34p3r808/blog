@@ -3,7 +3,6 @@ kind: Service
 metadata:
   name: blog-service
   annotations:
-    service.beta.kubernetes.io/aws-load-balancer-ssl-cert: arn:aws:elasticloadbalancing:us-east-1:652022992727:loadbalancer/app/kyblog/eb5948da37c547a2
     service.beta.kubernetes.io/aws-load-balancer-type: "alb"
 spec:
   type: LoadBalancer
