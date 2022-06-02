@@ -144,7 +144,37 @@ p{
     width: 20%;
     height: 20%;
     margin-left: 100px;
-    border-color: #fff;
+    border-color: white;
     border-radius: 5px;
-    border-style:ridge;
+    border-style:outset;
+}
+
+.Security{
+    width: 35%;
+    border-color: white;
+    border-radius: 5px;
+    border-style:outset;
+}
+
+.DevOps{
+    width: 35%;
+    border-color: white;
+    border-radius: 5px;
+    border-style:outset;
+}
+
+.python{
+    width: 37%;
+    height: 100%;
+    border-color: white;
+    border-radius: 5px;
+    border-style:outset;
+}
+
+.powershell{
+    width: 25%;
+    height: 50%;
+    border-color: white;
+    border-radius: 5px;
+    border-style:outset;
 }

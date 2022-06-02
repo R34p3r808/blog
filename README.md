@@ -219,13 +219,3 @@ This will deploy all of the pods that are requested in the file (3) and pull the
 
 
 
-
-
-
-
-hi
-
-
-
-
-
