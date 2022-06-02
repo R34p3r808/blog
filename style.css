@@ -163,7 +163,7 @@ p{
     border-style:outset;
 }
 
-.python{
+.Scripting{
     width: 37%;
     height: 100%;
     border-color: white;
@@ -171,10 +171,3 @@ p{
     border-style:outset;
 }
 
-.powershell{
-    width: 25%;
-    height: 50%;
-    border-color: white;
-    border-radius: 5px;
-    border-style:outset;
-}
