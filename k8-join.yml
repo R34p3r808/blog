@@ -1,0 +1,18 @@
+apiVersion: kubeadm.k8s.io/v1beta3
+caCertPath: /etc/kubernetes/pki/ca.crt
+discovery:
+  bootstrapToken:
+    apiServerEndpoint: 10.0.1.125:6443
+    caCertHashes:
+    - sha256:bd244f9c4b0538f669ccc39a574a883415b3cd8cfee266d85fb63b1627823069
+    token: 9b32wz.n433hwdfjvvjpjhe
+  timeout: 5m0s
+  tlsBootstrapToken: 9b32wz.n433hwdfjvvjpjhe
+kind: JoinConfiguration
+nodeRegistration:
+  criSocket: unix:///var/run/containerd/containerd.sock
+  imagePullPolicy: IfNotPresent
+  kubeletExtraArgs:
+    cloud-provider: aws
+  name: ip-10-0-11-4.ec2.internal
+  taints: null

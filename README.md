@@ -131,6 +131,12 @@ In order to install docker, you can follow the same steps required to install do
 echo "net.bridge.bridge-nf-call-iptables=1" | sudo tee -a /etc/sysctl.conf
 sudo sysctl -p
 
+-OR-
+
+You only have to do this on the Master ec2 node without worry about the worker node:
+
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
+
 
 **#Initializing the Kubernetes cluster**
 
@@ -138,32 +144,9 @@ On the machine that you deem the master node, run the following commands.
 
 I typically run these kubernetes cluster commands as root.  You can do it as a regular user as well.  *sudo su -* should be used to login as root.
 
-Command: export MASTER_IP=<IP_of_Master_Node>
+command: kubeadm init --config /etc/kubernetes/k8-init.yml
 
-Command: kubeadm init --apiserver-advertise-address=${MASTER_IP} --pod-network-cidr=10.244.0.0/16
-
-Explanation: Essentially, the export command is creating the MASTER_IP variable which is inserted into the next command.  The second command is responsible for creating a new cluster subnet.  This has no bearing on the host IP address.
-
-#Debugging/Troubleshooting 'kubeadm init'
-
-Sometimes upon initializing the kubernetes cluster, we get container runtime errors and or swap errors.  Kubernetes relies on containerd as a service to run and it this service isn't restarted, sometimes it can hold the command up.
-
-The fix for CRI errors: 
-
-rm /etc/containerd/config.toml
-systemctl restart containerd
-
-The fix for kubelet swap errors:
-
-Temporary fix --> swapoff -a
-Permanent fix --> sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
-
-After this, you should be able to run the whole 'kubeadm init' command without problem.
-
-**#Joining nodes to kubernetes cluster**
-
-After you fix any errors you may have gotten (sometimes they are plentiful *sad*) you will be given a 'kubeadm join' command with the IP address of your master node.  The 6443 port is so the nodes can reach back to the API hosted on the master.
-
+Explanation: You can see this yaml file in my github above.  Ensure that your service subnet and pod subnet are set to your respective needs.  10.244.0.0/16 is needed due to the flannel plugin.  A yaml file works better instead of typing out a long command, you can specify that kubernetes needs to initialize with AWS as a cloud provider.
 
 THIS PART IS VERY IMPORTANT!!!!!
 
@@ -179,14 +162,30 @@ If you are a regular user:
   sudo cp -i /etc/kubernetes/admin.conf $HOME/.kube/config
   sudo chown $(id -u):$(id -g) $HOME/.kube/config
 
-If you do this right the first time, it will save you a whole lot of headache. Basically, these commands are pointing to the admin.conf file where the configuration for your kubernetes cluster lies. If you don't run these commands you will consistently get errors that say something like "Localhost:8080 -> could not connect to host".  Without the 'admin.conf' file, kubectl doesn't know where to look and it should be pointing to your host IP at port 6443, NOT 8080.
+#Debugging/Troubleshooting 'kubeadm init'
 
-Now you can paste the 'kubeadm join' command to the kubernetes nodes.
+Sometimes upon initializing the kubernetes cluster, we get container runtime errors and or swap errors.  Kubernetes relies on containerd as a service to run and it this service isn't restarted, sometimes it can hold the command up.
 
-My command (yours will be different):
+The fix for CRI errors: 
 
-kubeadm join 192.168.0.30:6443 --token 0qp665.hrx7vdzhzu6wt1c6 \
-	--discovery-token-ca-cert-hash sha256:8354343d2d4140a61f0d8d5303d47c5f24bc946ee25b39fd1c73690da0c2adab
+rm /etc/containerd/config.toml
+systemctl restart containerd
+
+The fix for kubelet swap errors:
+
+Temporary fix --> swapoff -a
+Permanent fix --> sed -i '/ swap / s/^\(.*\)$/#\1/g' /etc/fstab
+#This was seemingly not an issue on ec2 instances.
+
+After this, you should be able to run the whole 'kubeadm init' command without problem.
+
+**#Joining nodes to kubernetes cluster**
+
+After you fix any errors you may have gotten (sometimes they are plentiful *sad*) you will be given a 'kubeadm join' command with the IP address of your master node.  The 6443 port is so the nodes can reach back to the API hosted on the master.
+
+Command: kubeadm join --config /etc/kubernetes/k8-join.yml
+
+Explanation: This file has all of the information that is needed to join the cluster.  As you look through, you will notice that it has the kubeadm join hash and token.  Ensure that yours has it's own.  The 'apiServerEndpoint' should be your master's IP.  The 'name' will be the worker node hostname.  Everything else should be a carbon copy of my yaml file.
 
 Sometimes you may have connectivity issues and the API can be a little inconsistent at times.  To check on the kubernetes services, use the following command:
 
@@ -209,9 +208,13 @@ Yaml may be frightening at first but it will actually manage the deployment in a
 
 To deploy this file, on the master:
 
-**kubectl apply -f blog_deployment.yaml"**
+**kubectl apply -f blog_deployment.yaml**
 
 This will deploy all of the pods that are requested in the file (3) and pull the website image from my docker repository.
+
+**kubectl apply -f blog-service.yaml**
+
+
 
 
 
