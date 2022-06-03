@@ -11,9 +11,9 @@
         <nav>
             <label class="logo">Kloud Security Blog</a></label>
             <ul>
-                <li><a class="active" href="index.html">Home</a></li>
+                <li><a href="../index.html">Home</a></li>
                 <li><a href="../about.html">About</a></li>
-                <li><a href="../blog.html">Blog</a></li>
+                <li><a class="active" href="../blog.html">Blog</a></li>
                 <li><a href="../career.html">Career</a></li>
                 <li><a href="../contact.html">Contact</a></li>
             </ul>
@@ -22,10 +22,10 @@
             <div class="date"></div>
             <h2>Setting up a website in a Docker container</h2>
 <p class="paragraph">Want to see how to make a website and put it in a Docker container?</p>
-       
-        <p><center>Installing Ubuntu 18.04 and Initializing for Docker</center></p>
+        <br/><br/>
+                                        <center>Installing Ubuntu 18.04 and Initializing for Docker</center>
 
-        <p>For the intention of ensuring that my website is working within a docker container I will be using docker on an Ubuntu virtual 
+         <p>For the intention of ensuring that my website is working within a docker container I will be using docker on an Ubuntu virtual 
             machine instead of an ec2 instance on AWS. It's easier to spin it up locally first rather than trying to debug any errors on 
             AWS. I will be using Ubuntu 18.04, I tried 22.04 and that version does not seem to play well with the new Docker and Kubeadm 
             versions. The containers/pods constantly crashed and after troubleshooting for hours, it seemed to be easier to go with 18.04 
@@ -33,36 +33,67 @@
         
         <p>First and foremost you should ensure that your Ubuntu machine has the newest upgrades/updates & patches.</p>
         
-        <p>Command: sudo apt-get update && apt-get upgrade</p>
-        <p>If you have any issues running this command, you can log in with <bold>sudo su -</bold> and then run your update and upgrade commands.</p>
+        <p>Command:</p> 
+        <div class="code">$ sudo apt-get update && apt-get upgrade</div>
+
+        <p>If you have any issues running this command, you can log in as root with <bold>sudo su -</bold> and then run your update and upgrade commands.</p>
+        <br/><br/>
+                                                        <center>Installing Docker</center>
         
-        #Installing Docker
+        <p>To install docker for the first time you can follow the instructions on the website (<a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank">https://docs.docker.com/engine/install/ubuntu/</a>) 
+            or just follow the commands here. If you have an older version of docker you may want to remove it first with,</p>
+        <p>command:</p>
+        <div class="code">$ sudo apt-get remove docker docker-engine docker.io containerd runc</div>
+        <p>Please copy and paste these commands to create the repository and GPG keys needed to install Docker.</p>
+        <p>Commands:</p>
         
-        To install docker for the first time you can follow the instructions on the website or just follow the commands here. If you have an older version of docker you may want to remove it first with: sudo apt-get remove docker docker-engine docker.io containerd runc
+        <div class="code">
+            $ sudo apt-get update
+            <br/><br/>
+            $ sudo apt-get install \
+            <br/>
+            ca-certificates \
+            <br/>
+            curl \
+            <br/>
+            gnupg \
+            <br/>
+            lsb-release
+        </div>
+    
         
-        Commands:
+       <p>To add Docker's GPG key:</p>
+        <div class="code">
+            $ sudo mkdir -p /etc/apt/keyrings
+            <br/><br/>
+            $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        </div>
         
-        sudo apt-get install
-        ca-certificates
-        curl
-        gnupg
-        lsb-release
-        
-        sudo mkdir -p /etc/apt/keyrings
-        
-        curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
-        
-        echo
-        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu
+        <p>To set up the necessary repository for Docker:</p>
+
+        <div class="code">
+        echo \
+        <br/>
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        <br/>
         $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        </div>
         
-        sudo apt-get update
+        <p>Now for actually installing Docker along with some add-ons (containerd is a necessary CRI for new versions of Kubernetes):</p>
         
-        sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+        <div class="code">
+        $ sudo apt-get update
+        <br/><br/>
+        $ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+        </div>    
         
-        #Making a Dockerfile
+        <br/><br/>
+        <center>Making a Dockerfile for your Web App</center>
         
-        First, it is recommended to make a docker hub profile to ensure that you have access to a list of the prebuilt docker images such as the nginx image that I am using. This will also give you the opportunity to host your own repository that you can make private or public, just like github.
+        <p>First, it is recommended to make a docker hub profile to ensure that you have access to a list of the prebuilt docker images 
+            such as the nginx image that I am using. This will also give you the opportunity to host your own repository that you can make 
+            either private or public, just like github.  Keep in mind if the repo is made private you will have to add some additional
+            configuration to your kubernetes yaml to allow it permission to pull the Docker image.</p>
         
         In order to build a docker container you need to start with a "Dockerfile" that will give some instructions on how the container should be built.
         
