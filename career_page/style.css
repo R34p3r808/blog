@@ -1,0 +1,168 @@
+@import url(https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400);
+
+body{
+    background-image: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), url(../Image/cyber.jpg);
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+    width: 1200px;
+    border: 4px solid #fff;
+    font-family: source sans Pro, sans-serif;
+    padding: 20px;
+    margin: 20px auto;
+    max-width: 1500px;
+}
+
+.clearfix{clear: both;}
+
+.resume-box{
+    width: 800px;
+    height: 1040px;
+    margin: 0 auto;
+    background-color: white;
+}
+
+.box-outer{
+    padding: 30px;
+}
+
+.box-1{
+    background-color: #26252d;
+    width: 35%;
+    float: left;
+    height: 1040px;
+}
+
+.box-2{
+    width: 60%;
+    float: left;
+    padding: 20px;
+}
+
+.profile{
+    width: 100%;
+}
+
+.content{
+    padding: 20px;
+}
+
+h1{
+    color: #ceced1;
+    font-weight: 300;
+    text-transform: uppercase;
+}
+
+p{
+    color: #ceced1;
+    font-weight: 300;
+    font-size: 14px;
+}
+
+#progress{
+    background-color: #333;
+    border-radius: 13px;
+    height: 8px;
+    width: 100%;
+    padding: 3px;
+}
+
+#progress:after{
+    content:'';
+    display: block;
+    background-color: blue;
+    border-radius: 9px;
+    height: 8px;
+    width: 85%;
+}
+
+#progress1{
+    background-color: #333;
+    border-radius: 13px;
+    height: 8px;
+    width: 100%;
+    padding: 3px;
+}
+
+#progress1:after{
+    content:'';
+    display: block;
+    background-color: blue;
+    border-radius: 9px;
+    height: 8px;
+    width: 70%;
+}
+
+#progress2{
+    background-color: #333;
+    border-radius: 13px;
+    height: 8px;
+    width: 100%;
+    padding: 3px;
+}
+
+#progress2:after{
+    content:'';
+    display: block;
+    background-color: blue;
+    border-radius: 9px;
+    height: 8px;
+    width: 50%;
+}
+
+#progress3{
+    background-color: #333;
+    border-radius: 13px;
+    height: 8px;
+    width: 100%;
+    padding: 3px;
+}
+
+#progress3:after{
+    content:'';
+    display: block;
+    background-color: blue;
+    border-radius: 9px;
+    height: 8px;
+    width: 60%;
+}
+
+nav{
+    padding: 0;
+    margin: 0;
+    text-decoration: none;
+    list-style: none;
+    box-sizing: border-box;
+    background: #0082e6;
+    height: 100px;
+    width: 100%;
+}
+label.logo{
+    color: white;
+    font-size: 35px;
+    padding: 0 100px;
+    line-height: 100px;
+    font-weight: bold;
+}
+nav ul{
+    float: right;
+    margin-right: 20px;
+}
+nav ul li{
+    display: inline-block;
+    line-height: 80px;
+    margin: 0 5px;
+}
+nav ul li a{
+    color: white;
+    font-size: 17px;
+    padding: 7px 13px;
+    border-radius: 3px;
+    text-transform: uppercase;
+    text-decoration: solid;
+    font-weight: bold;
+    font-family:'Gill Sans', 'Gill Sans MT', Calibri, 'Trebuchet MS', sans-serif
+}
+a.active,a:hover{
+    background: #1b9bff;
+    transition: .5s;
