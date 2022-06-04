@@ -4,10 +4,10 @@ discovery:
   bootstrapToken:
     apiServerEndpoint: 10.0.1.125:6443
     caCertHashes:
-    - sha256:bd244f9c4b0538f669ccc39a574a883415b3cd8cfee266d85fb63b1627823069
-    token: 9b32wz.n433hwdfjvvjpjhe
+    - sha256:591edc9fa3ea3b239d84160662978a8947a016b29145b37b113f0c68f2b72273
+    token: dswmbu.oauz1n8y2ojnqi0e
   timeout: 5m0s
-  tlsBootstrapToken: 9b32wz.n433hwdfjvvjpjhe
+  tlsBootstrapToken: dswmbu.oauz1n8y2ojnqi0e
 kind: JoinConfiguration
 nodeRegistration:
   criSocket: unix:///var/run/containerd/containerd.sock
@@ -16,3 +16,4 @@ nodeRegistration:
     cloud-provider: aws
   name: ip-10-0-11-4.ec2.internal
   taints: null
+
