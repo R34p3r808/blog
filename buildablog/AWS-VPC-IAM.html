@@ -1,27 +1,336 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head>
+        <title>Docker</title>
         <meta charset="utf-8">
-        <link rel="icon" type="image/png" sizes="32x32" href="Image/favicon-32x32.png">
-        <link rel="stylesheet" href="../style.css"> 
+        <link rel="icon" type="image/png" sizes="32x32" href="../Image/favicon-32x32.png">
+        <link rel="stylesheet" href="style.css"> 
         <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400" type="text/css" rel="stylesheet">
-        <title></title>
     </head>
     <body>
         <nav>
             <label class="logo">Just Kloud Security</a></label>
             <ul>
-                <li><a class="active" href="index.html">Home</a></li>
+                <li><a href="../index.html">Home</a></li>
                 <li><a href="../about.html">About</a></li>
-                <li><a href="../blog.html">Blog</a></li>
+                <li><a class="active" href="../blog.html">Blog</a></li>
                 <li><a href="../career.html">Career</a></li>
-                <li><a href="../contact.html">Contact</a></li>
             </ul>
         </nav>
         <div class="blog">
             <div class="date"></div>
-            <h2>This blog isn't yet up.</h2>
-<p class="paragraph">The good news: it's on my GitHub for now until it is moved here.</p>
+            <h2>Creating a VPC with IAM roles for ec2 instances hosting a K8 cluster</h2>
+<p class="paragraph">Join me as I create the necessary VPC and roles for ec2 instances running a K8 cluster.</p>
+        <br/><br/>
+                                        <center>Creating a new VPC</center>
+
+        <p>For all intents and purposes, let's start a new virtual private cloud (VPC) network.  This will allow us to start a new subnet without
+             interfering with other VPCs that may be set up.  You can keep it on your default VPC if you would like but this will show you how to 
+             start it from the ground up.  It will also show the correct permissions (IAM roles) that will be assigned to the ec2 instances that will be hosting
+             the Kubernetes cluster.  These permissions will allow the instances to interact with other AWS services such as load balancers, etc.
+        </p>
+        <br/>
+        <h3>Create a new VPC with a new CIDR:</h3>
+        <center><image class="vpc-create": imgage src="../Image/AWS_VPC/vpc-create.PNG"></center>
+        <p>After the VPC is created, ensure that you add the tag: <italic>kubernetes.io/cluster/kubernetes.</italic> This will
+        allow the K8 cluster to discover any resources with this tag name and recognize it.</p>
+        <br/>
+        <h3>VPC tag:</h3>
+        <center><image class="vpc-tag": image src="../Image/AWS_VPC/vpc-tag.PNG"></center>
+        <br/>
+        <p>After you create the new tag for the VPC, you'll want to ensure that DNS hostnames is enabled on the VPC. You can do this as shown 
+        in the following picture:
+        </p>
+        <center><image class="vpc-hostname": image src="../Image/AWS_VPC/vpc-hostname.PNG"><image class="vpc-hostname1": image src="../Image/AWS_VPC/vpc-hostname1.PNG"></image></center>
+        <br/><br/>
+                                    
+                                        <center>Creating a new subnet in the VPC</center>
+        <br/>
+        <center><image class="vpc-subnet": image src="../Image/AWS_VPC/vpc-subnet.PNG"></center>
+        <p>Ensure that you are adding the same tags to each newly created tool/service.  As you can see above, I added the <italic>
+            kubernetes.io/cluster/kubernetes</italic> and make sure that the value is set to <bold>owned</bold>.</p>
+
+        <center><image class="vpc-auto": image src="../Image/AWS_VPC/vpc-autoip.PNG"></center><center><image class="vpc-auto1": image src="../Image/AWS_VPC/vpc-autoipcheck.PNG"></center>
+
+        <p>Right click on the new subnet that you just created and click on "Edit subnet settings". Once the next page loads you should see a section 
+            named "Auto-assign IP settings".  Verify that the "Enable auto-assign public IPv4 address" is checked on. You may be asking if this is 
+            the most secure method...unfortunately, it is not.  We will dial up the security in another blog to see what is accessible or not. Just
+            keep in mind that this subnet will allow any new NIC assignment of a public IPv4 address (our ec2 instances). Since you own the website, you are able to pen-test it. Keep in mind
+            that you CANNOT pentest AWS itself.  For more information on AWS pentesting: <a href="https://aws.amazon.com/security/penetration-testing/" target="blank">https://aws.amazon.com/security/penetration-testing/</a>.
+        </p>
+        <br/>
+
+                                    <center>Creating an Internet Gateway (IGW)</center>
+        <p>We will create an IGW that will allow traffic to pass from the internet to our newly created subnet (keep the same tags as the
+            other services):</p>
+        <center><image class="vpc-igw": image src="../Image/AWS_VPC/vpc-igw.PNG"></center>
+        
+        <p>You will then want to attach the IGW to the VPC that you created:</p>
+        <center><image class="vpc-igw-attach": image src="../Image/AWS_VPC/vpc-igw-attach.PNG"></center>
+        <p>My "Attach to VPC" button is grayed out because I had already attached it prior to this. On the next page you should see a drop down
+            menu that allows you to select your VPC.
+        </p>
+        <br/>
+
+                                <center>Create a Routing Table</center>
+        <p>Next step is to make a routing table for our VPC (again, don't forget the tag!):</p>
+        <center><image class="vpc-rtbcreate": image src="../Image/AWS_VPC/vpc-rtbcreate.PNG"></center>
+        <p>Associate the routing table with the K8 subnet:</p>
+        <center><image class="vpc-rtbassociate": image src="../Image/AWS_VPC/vpc-rtbassociate.PNG"></center>
+        <p>Select the subnet you would like to associate with (our new K8 subnet):</p>    
+        <center><image class="vpc-subnetassociations": image src="../Image/AWS_VPC/vpc-subnetassociations.PNG"></center>
+        <br/><br/>
+
+                                <center>Time for some IAM Policies!</center>
+       
+        <p>In order for Kubernetes to interact with the necessary AWS services, we have to create IAM roles for two different ec2 instances.
+            The two instances will be the master node and the worker nodes.
+        </p>
+       <p>For the IAM Master role we will creating a new policy first.</p>
+       <center><image class="vpc-masterpolicy": image src="../Image/AWS_VPC/vpc-masterpolicy.PNG"></center>
+       <p>As you can see, there is another policy named <italic>k8s-cluster-iam-worker-policy</italic>.  You will follow these exact same steps
+        to create a worker node policy with a different JSON set.  For now let's create the <italic>k8s-cluster-iam-master-policy</italic>.
+        Create that master policy and use the following JSON (formatting on this page isn't exact but AWS will take it):</p>
+        <div class="JSON">
+        {
+            <br/>
+            "Version": "2012-10-17",
+            <br/>
+            "Statement": [
+            <br/>
+                {
+                    <br/>
+                    "Effect": "Allow",
+                    <br/>
+                    "Action": [
+                    <br/>
+                        "autoscaling:DescribeAutoScalingGroups",
+                        <br/>
+                        "autoscaling:DescribeLaunchConfigurations",
+                        <br/>
+                        "autoscaling:DescribeTags",
+                        <br/>
+                        "ec2:DescribeInstances",
+                        <br/>
+                        "ec2:DescribeRegions",
+                        <br/>
+                        "ec2:DescribeRouteTables",
+                        <br/>
+                        "ec2:DescribeSecurityGroups",
+                        <br/>
+                        "ec2:DescribeSubnets",
+                        <br/>
+                        "ec2:DescribeVolumes",
+                        <br/>
+                        "ec2:CreateSecurityGroup",
+                        <br/>
+                        "ec2:CreateTags",
+                        <br/>
+                        "ec2:CreateVolume",
+                        <br/>
+                        "ec2:ModifyInstanceAttribute",
+                        <br/>
+                        "ec2:ModifyVolume",
+                        <br/>
+                        "ec2:AttachVolume",
+                        <br/>
+                        "ec2:AuthorizeSecurityGroupIngress",
+                        <br/>
+                        "ec2:CreateRoute",
+                        <br/>
+                        "ec2:DeleteRoute",
+                        <br/>
+                        "ec2:DeleteSecurityGroup",
+                        <br/>
+                        "ec2:DeleteVolume",
+                        <br/>
+                        "ec2:DetachVolume",
+                        <br/>
+                        "ec2:RevokeSecurityGroupIngress",
+                        <br/>
+                        "ec2:DescribeVpcs",
+                        <br/>
+                        "elasticloadbalancing:AttachLoadBalancerToSubnets",
+                        <br/>
+                        "elasticloadbalancing:ApplySecurityGroupsToLoadBalancer",
+                        <br/>
+                        "elasticloadbalancing:CreateLoadBalancer",
+                        <br/>
+                        "elasticloadbalancing:CreateLoadBalancerPolicy",
+                        <br/>
+                        "elasticloadbalancing:CreateLoadBalancerListeners",
+                        <br/>
+                        "elasticloadbalancing:ConfigureHealthCheck",
+                        <br/>
+                        "elasticloadbalancing:DeleteLoadBalancer",
+                        <br/>
+                        "elasticloadbalancing:DeleteLoadBalancerListeners",
+                        <br/>
+                        "elasticloadbalancing:DescribeLoadBalancers",
+                        <br/>
+                        "elasticloadbalancing:DescribeLoadBalancerAttributes",
+                        <br/>
+                        "elasticloadbalancing:DetachLoadBalancerFromSubnets",
+                        <br/>
+                        "elasticloadbalancing:DeregisterInstancesFromLoadBalancer",
+                        <br/>
+                        "elasticloadbalancing:ModifyLoadBalancerAttributes",
+                        <br/>
+                        "elasticloadbalancing:RegisterInstancesWithLoadBalancer",
+                        <br/>
+                        "elasticloadbalancing:SetLoadBalancerPoliciesForBackendServer",
+                        <br/>
+                        "elasticloadbalancing:AddTags",
+                        <br/>
+                        "elasticloadbalancing:CreateListener",
+                        <br/>
+                        "elasticloadbalancing:CreateTargetGroup",
+                        <br/>
+                        "elasticloadbalancing:DeleteListener",
+                        <br/>
+                        "elasticloadbalancing:DeleteTargetGroup",
+                        <br/>
+                        "elasticloadbalancing:DescribeListeners",
+                        <br/>
+                        "elasticloadbalancing:DescribeLoadBalancerPolicies",
+                        <br/>
+                        "elasticloadbalancing:DescribeTargetGroups",
+                        <br/>
+                        "elasticloadbalancing:DescribeTargetHealth",
+                        <br/>
+                        "elasticloadbalancing:ModifyListener",
+                        <br/>
+                        "elasticloadbalancing:ModifyTargetGroup",
+                        <br/>
+                        "elasticloadbalancing:RegisterTargets",
+                        <br/>
+                        "elasticloadbalancing:SetLoadBalancerPoliciesOfListener",
+                        <br/>
+                        "iam:CreateServiceLinkedRole",
+                        <br/>
+                        "kms:DescribeKey"
+                        <br/>
+                    ],
+                    <br/>
+                    "Resource": [
+                    <br/>
+                        "*"
+                        <br/>
+                    ]
+                    <br/>
+                }
+                <br/>
+            ]
+            <br/>
+        }
+        </div>
+       <p>Feel free to look at each policy to see what it is doing.  It is essentially giving the Master ec2 instance the proper permissions to
+           control ec2 services as well as load balancer services.  You will see why when we run our cluster.  It should initiate a load balancer
+           automatically when you apply the proper service yaml file.
+       </p>
+       <p>Once you create the policy, AWS will fix the JSON formatting and it will look something like this:</p>
+       <center><image class="vpc-masterpolicyjson": image src="../Image/AWS_VPC/vpc-masterpolicyjson.PNG"></center>
+       <p>You will see that 6 sevices are set to allow:</p>
+       <center><image class="vpc-k8masterpolicy": image src="../Image/AWS_VPC/vpc-k8masterpolicy.PNG"></center>
+       <p>You can now create the policy.</p> 
+        <br/>
+                                            <center>IAM Roles</center>
+        <p>Now that we have created a policy, we want to create a role that can be attached to the policy. Verify that you have selected
+            the EC2 use case as seen in the picture below.
+        </p>
+        <center><image class="vpc-roleec2": image src="../Image/AWS_VPC/vpc-roleec2.PNG"></center>
+        <p>After you click 'Next', you will see a list of policies.  Select the one that pertains to this new role (Master policy):</p>
+        <center><image class="vpc-selectpolicy": image src="../Image/AWS_VPC/vpc-selectpolicy.PNG"></center>
+        <p>On the following page after selecting your policy, you can name your role whatever you would like.  Just ensure to make it
+            recognizable for future selection upon initializing an ec2 instance. Make sure that you click on 'Create Role':</p>
+        <center><image class="vpc-rolefinal": image src="../Image/AWS_VPC/vpc-rolefinal.PNG"></center>
+        <br/>
+        <p>After you have created your Master policy and role, you will complete the exact same steps to create a Worker policy and role. 
+            Here is the JSON necessary to make a Worker policy (thankfully, the JSON is much smaller):
+            <div class="JSON">{
+                <br/>
+                "Version": "2012-10-17",
+                <br/>
+                "Statement": [
+                <br/>
+                    {
+                        <br/>
+                        "Effect": "Allow",
+                        <br/>
+                        "Action": [
+                        <br/>
+                            "ec2:DescribeInstances",
+                            <br/>
+                            "ec2:DescribeRegions",
+                            <br/>
+                            "ecr:GetAuthorizationToken",
+                            <br/>
+                            "ecr:BatchCheckLayerAvailability",
+                            <br/>
+                            "ecr:GetDownloadUrlForLayer",
+                            <br/>
+                            "ecr:GetRepositoryPolicy",
+                            <br/>
+                            "ecr:DescribeRepositories",
+                            <br/>
+                            "ecr:ListImages",
+                            <br/>
+                            "ecr:BatchGetImage"
+                            <br/>
+                        ],
+                        <br/>
+                        "Resource": "*"
+                        <br/>
+                    }
+                    <br/>
+                ]
+                <br/>
+            }
+            </div>
+            <br/><br/>
+                                    <center>Let's spin up our EC2s!</center>
+            <p>Now that we have created the networking and the roles/policies necessary to get Kubernetes up and running, we can make our ec2
+                instances. Keep in mind that my AWS page layout may be a bit different.  I am using the new rollout that AWS is testing but
+                the underlying information is the same.
+            </p>
+            <h3>Master EC2 Image:</h3>
+            <center><image class="masterec2": image src="../Image/AWS_VPC/masterec2.PNG"></center>
+            <p>Verify that you have selected the Ubuntu 18.04 OS. I have verified that this is the best practice when using the newest
+                versions of Kubernetes (v1.24) and Docker with containerd (CRI).
+            <h3>Adding the tag:</h3>
+            <center><image class="tagsec2": image src="../Image/AWS_VPC/tagsec2.PNG"></center>
+            </p>
+            <h3>Instance type and Key pair:</h3>
+            <center><image class="instancetype-keypp": image src="../Image/AWS_VPC/instancetype-keypp.PNG"></center>
+            <p>For the purposes of using Kubernetes, you need to use at least 2 vCPUs and 2 GB of memory/RAM. If you dont't, Kubernetes will
+                not work correctly. I am using a t3.small instance type since it is a bit cheaper and I will only be creating 3 images of my static
+                site on kubernetes.  If you have a larger site or application that requires a lot of processing and memory, you may want to 
+                use a larger instance.  A step up from the one that I am using would be the t2.medium (2 vCPU and 4 GB of memory/RAM).  At the time
+                of this blog, t2.medium is double the price, but we are talking about pennies.</p>
+            <p>You may can use an existing key pair or create a new one to SSH into the instances.  I recommend using key pairs over username and
+                password which can be a lot less secure.</p>
+            <h3>Network settings:</h3>
+            <center><image class="networksettings": image src="../Image/AWS_VPC/networksettings.PNG"></center>
+            <p>For the first instance you'll want to select 'Create security group'. Click on the 'Edit' button on the top right of the 
+                Network Settings box and you will see the option to create your own rules.  Copy the same one that I am using, 'All Traffic' 
+                (Again, we will check security on this in another blog, focus is to get Kubernetes up and running
+                for now). You can see this in the image below.  <bold>When you create the worker node EC2 instance, you will click 'Select existing security group'
+                </bold> and put it in the same SG as the Master node.
+            </p>
+            <center><image class="createsg": image src="../Image/AWS_VPC/createsg.PNG"></center>
+            <h3>Adding the EC2 instance to the Master role:</h3>
+            <center><image class="ec2role": image src="../Image/AWS_VPC/ec2role.PNG"></center>
+            <p>Scroll to the bottom and click on the carrot next to the 'Advanced details' section and you will see the drop down where you can
+                select the appropriate master role.  You will now rinse and repeat the EC2 steps for the worker node.  The only difference is that 
+                you will select to add the instance to the already existing SG from your Master EC2 instance and to select the worker role instead of
+                the master role.
+            </p>
+                                    <center>That wraps up part 2!</center>
+            <p>Stick around to follow me in the next blog where I set up kubernetes and get the whole website running.  We're almost there.  
+            Get excited! We will be seeing our website/app up and showing publicly shortly.
+            </p>
+            <p>Click <a href="kubernetes-on-ec2.html">here</a> for the final part of this series.</p>
+        <hr>
         </div>
     </body>
 </html>

@@ -76,8 +76,9 @@ h2{
 }
 
 h3{
-    font-size: 2.0rem;
-    color: #fff;
+    padding-left: 30px;
+    font-size: ;
+    color: black;
     text-transform: uppercase;
 }
 hr{
@@ -99,6 +100,10 @@ bold{
     text-decoration: underline;
 }
 
+italic{
+    font-style: italic;
+}
+
 center{
     color: rgb(0, 0, 0);
     font-weight: 600;
@@ -112,6 +117,13 @@ center{
     font-size: 15px;
     margin-left: 30px;
     margin-right: 750px;
+}
+.JSON{
+        color: white;
+        background-color: black;
+        font-size: 15px;
+        margin-left: 400px;
+        margin-right: 350px;
 }
 
 .span{
@@ -128,4 +140,51 @@ center{
     width: 50%;
 }
 
-
+.vpc-create{
+    width: 50%;
+}
+.vpc-subnet{
+    width: 50%;
+}
+.vpc-igw{
+    width: 50%;
+}
+.vpc-rtbcreate{
+    width: 50%;
+}
+.vpc-rtbassociate{
+    width: 30%;
+}
+.vpc-subnetassociations{
+    width: 70%;
+}
+.vpc-masterpolicy{
+    width: 80%;
+}
+.vpc-k8masterpolicy{
+    width: 70%;
+}
+.vpc-roleec2{
+    width: 50%;
+}
+.vpc-rolefinal{
+    width: 30%;
+}
+.masterec2{
+    width: 40%;
+}
+.instancetype-keypp{
+    width: 50%;
+}
+.networksettings{
+    width: 50%;
+}
+.createsg{
+    width: 50%;
+}
+.tagsec2{
+    width: 50%;
+}
+.ec2role{
+    width: 50%;
+}
