@@ -1,11 +1,11 @@
 <!DOCTYPE html>
 <html lang="en" dir="ltr">
     <head>
+        <title>Docker</title>
         <meta charset="utf-8">
-        <link rel="icon" type="image/png" sizes="32x32" href="Image/favicon-32x32.png">
-        <link rel="stylesheet" href="../style.css"> 
+        <link rel="icon" type="image/png" sizes="32x32" href="../Image/favicon-32x32.png">
+        <link rel="stylesheet" href="style.css"> 
         <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400" type="text/css" rel="stylesheet">
-        <title></title>
     </head>
     <body>
         <nav>
@@ -20,8 +20,155 @@
         </nav>
         <div class="blog">
             <div class="date"></div>
-            <h2>This blog isn't yet up.</h2>
-<p class="paragraph">The good news: it's on my GitHub for now until it is moved here.</p>
+            <h2>Configuring Kubernetes on AWS EC2: Hosting our Website</h2>
+<p class="paragraph">Want to see how to make a website and put it in a Docker container?</p>
+        <br/><br/>
+                                        <center>Installing Ubuntu 18.04 and Initializing for Docker</center>
+
+         <p>For the intention of ensuring that my website is working within a docker container I will be using docker on an Ubuntu virtual 
+            machine instead of an ec2 instance on AWS. It's easier to spin it up locally first rather than trying to debug any errors on 
+            AWS. I will be using Ubuntu 18.04, I tried 22.04 and that version does not seem to play well with the new Docker and Kubeadm 
+            versions. The containers/pods constantly crashed and after troubleshooting for hours, it seemed to be easier to go with 18.04 
+            until the issues are smoothed out.</p>
+        
+        <p>First and foremost you should ensure that your Ubuntu machine has the newest upgrades/updates & patches.</p>
+        
+        <p>Command:</p> 
+        <div class="code">$ sudo apt-get update && apt-get upgrade</div>
+
+        <p>If you have any issues running this command, you can log in as root with <bold>sudo su -</bold> and then run your update and upgrade commands.</p>
+        <br/><br/>
+                                                        <center>Installing Docker</center>
+        
+        <p>To install docker for the first time you can follow the instructions on the website (<a href="https://docs.docker.com/engine/install/ubuntu/" target="_blank">https://docs.docker.com/engine/install/ubuntu/</a>) 
+            or just follow the commands here. If you have an older version of docker you may want to remove it first with,</p>
+        <p>Command:</p>
+        <div class="code">$ sudo apt-get remove docker docker-engine docker.io containerd runc</div>
+        <p>Please copy and paste these commands to create the repository and GPG keys needed to install Docker.</p>
+        <p>Commands:</p>
+        
+        <div class="code">
+            $ sudo apt-get update
+            <br/><br/>
+            $ sudo apt-get install \
+            <br/>
+            ca-certificates \
+            <br/>
+            curl \
+            <br/>
+            gnupg \
+            <br/>
+            lsb-release
+        </div>
+    
+        
+       <p>To add Docker's GPG key:</p>
+        <div class="code">
+            $ sudo mkdir -p /etc/apt/keyrings
+            <br/><br/>
+            $ curl -fsSL https://download.docker.com/linux/ubuntu/gpg | sudo gpg --dearmor -o /etc/apt/keyrings/docker.gpg
+        </div>
+        
+        <p>To set up the necessary repository for Docker:</p>
+
+        <div class="code">
+        $ echo \
+        <br/>
+        "deb [arch=$(dpkg --print-architecture) signed-by=/etc/apt/keyrings/docker.gpg] https://download.docker.com/linux/ubuntu \
+        <br/>
+        $(lsb_release -cs) stable" | sudo tee /etc/apt/sources.list.d/docker.list > /dev/null
+        </div>
+        
+        <p>Now for actually installing Docker along with some add-ons (containerd is a necessary CRI for new versions of Kubernetes):</p>
+        
+        <div class="code">
+        $ sudo apt-get update
+        <br/><br/>
+        $ sudo apt-get install docker-ce docker-ce-cli containerd.io docker-compose-plugin
+        </div>    
+        
+        <br/><br/>
+        <center>Making a Dockerfile for your Website/App</center>
+        
+        <p>First, it is recommended to make a docker hub profile to ensure that you have access to a list of the prebuilt docker images 
+            such as the nginx image that I am using. This will also give you the opportunity to host your own repository for your custom
+            containers that you can make either private or public, just like github.  Keep in mind if the repo is made private you will have
+            to add additional keys to your kubernetes yaml to allow it permission to pull the Docker image.</p>
+        
+        <p>In order to build a docker container you need to start with a "Dockerfile" that will give some instructions on how the container 
+            should be built.</p>
+        
+        <p><bold>This is my current Dockerfile:</bold></p>
+        
+        <center><img src="../Image/Docker/dockerfile.PNG"></center>
+        
+        <p>Each line represents a configuration that will be implemented when you run the "docker build" command. I am creating a container 
+        that is based off of the ngnix image hosted on the Docker repository. This will give me the base image needed to host the website.
+        The line after this ensures that the container has the most recent updates for certain packages and the kernel, etc. 
+        Ensure that you COPY your index.html file into the /usr/share/nginx/html/index.html of the container. This will replace the 
+        index.html file that is already in the ngnix container. If you don't do this, you risk the container showing the basic splash 
+        index.html that pops up on a standard ngnix server. This is a main reason that certain people may have an issue with their website 
+        showing THEIR index.html.</p>
+        
+        
+        <p>After this, you want to ensure that you COPY all files in the current directory "." to the same location that you copied your
+        index.html file to. This will ensure that all files are in the correct directory for hosting the website within the container. 
+        The last command will ensure that port 80 is exposed to the CONTAINER. This does not expose the host machine port. We can customize 
+        which port we want to use on the host machine through the "docker build" command on the linux command line. You can also use a 
+        docker-compose.yml file that would allow you to fine tune your volumes and port numbers as well. Docker-compose is an orchestrator 
+        for containers but since we will be using kubernetes to do our orchestration on AWS, I won't be doing a deep delve into that as of 
+        yet.</p>
+        
+                                        <center>Building your Docker Image from your Dockerfile</center>
+        
+        <p>After you have made your website/webapp and built your Dockerfile, you can test out your container to ensure that docker is 
+        working for you. I am working on a VMWare Workstation 16 player Ubuntu box for the sake of this build. I have VSCode installed 
+        on the virtual Ubuntu machine as well. Ensure that you have a copy of your website on the linux box and that you are working from
+        the directory that the website and dockerfile are hosted on the CLI.</p>
+        
+        <p>Once you are in the correct directory within the CLI, you can run the following command:</p>
+        <div class="code">$ docker build -t keitzkyle/blog:v1 .</div>
+        <p>Ensure that you put the "." at the end to tell docker that you would like the container build to happen in the current directory. 
+        Now, the last part 
+        of your command is going to be a bit different. The name of my docker profile is keitzkyle and I am naming the docker container 
+        blog:v1. The "v1" part is just the tag name. It is essentially a subcategory of the "blog" repo. If you eventually push out a v2, 
+        you can keep the two builds seperate. You can push your builds to your docker repo if you intend to pull the image with kubernetes.</p>
+        <br/>
+        <p>If you intend to do so, I recommend signing into Docker on the CLI with the following command:</p>
+        <div class="code">$ docker login</div>
+        <p>This command will ask you to sign in with your username and then your password.</p>
+        <br/>
+        <p>You can then push your image directly to your Docker repo with this command:</p>    
+        <div class="code">$ docker push keitzkyle/blog:tagname .</div> 
+        <p>Replace the command with your own profile and build name.</p>
+        <br/>
+        <p>When you run the build command you will start to see the build take place. You will see the commands that you inserted into the 
+            Dockerfile take place and the container should be built within seconds. You still wont be able to see your website because although 
+            the container is built, it is not yet running. Your build should look something like this:</p>
+            <center><image class="dockerbuild": image src="../Image/Docker/docker_build.PNG"></center>
+        <br/><br/>
+        <center>Running your Docker Image</center>
+
+        <p>Get excited! This is where we get to see all of our hard work in action. Once we run this command, we will be able to see
+        our locally hosted website. First, ensure that you are still in the same directory of your docker build file. Now we can run the
+        needed command:</p>
+        
+        <div class="code">$ docker run -p 8080:80 keitzkyle/blog:v1</div>
+        <br/>
+         
+        <p>Ensure that you are replacing the build name and tag with your own. This is going 
+        to expose port 8080 of the HOST machine and direct it to port 80 of the container. You do not have to use port 8080, you can 
+        realistically use any port that your machine isn't currently using. To check which ports your machine is using, you can use the 
+        <bold>netstat</bold> or <bold>netstat -ano</bold> command and you can actively see which ports are already listening or established.</p>
+        
+        <p>Once you run the command, you should see something similar to this:</p>
+        <center><img class="dockerrun": img src="../Image/Docker/docker_run.PNG"></center>
+        <p>After you run the command, you should be able to use whatever browser you choose and type in either "localhost:8080" or 
+            "127.0.0.1:8080". Your containerized application should appear and act as normal! If you run into any issues make sure that your 
+        linux firewall is disabled with <bold>sudo ufw disable</bold>.  You can check on the status of the firewall with
+        <bold>sudo ufw status</bold>.</p>
+        <p></p>
+        <hr>
         </div>
     </body>
 </html>
