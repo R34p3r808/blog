@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="en" dir="ltr">
+    <head>
+        <title>Snort</title>
+        <meta charset="utf-8">
+        <link rel="icon" type="image/png" sizes="32x32" href="../Image/favicon-32x32.png">
+        <link rel="stylesheet" href="style.css"> 
+        <link href="https://fonts.googleapis.com/css2?family=Source+Sans+Pro:wght@300;400" type="text/css" rel="stylesheet">
+    </head>
+    <body>
+        <nav>
+            <label class="logo">Just Kloud Security</a></label>
+            <ul>
+                <li><a href="../index.html">Home</a></li>
+                <li><a href="../about.html">About</a></li>
+                <li><a class="active" href="../blog.html">Blog</a></li>
+                <li><a href="../career.html">Career</a></li>
+            </ul>
+        </nav>
+        <div class="blog">
+            <div class="date"></div>
+            <h2>SNORT: Let's monitor our home network (GUI)</h2>
+<p class="paragraph">Make it easier to tell if there is something malicious on your network!</p>
+        <br/><br/>
+                                        <center>Installing Snort and enabling Promiscuous Mode</center>
+        <h3>Enable Promiscuous mode on your NIC:</h3>
+        <p>Command:</p>
+        <div class="code">$ sudo ifconfig (eth0/NIC) promisc</div>
+        <p>When you run this command you should see that your NIC has a new mode (picture below), promiscuous.  This allows the NIC
+            to sniff all traffic within the network. </p>
+        <center><image class="promisc": image src="../Image/Snort/2-settingpromisc.PNG"></center>
+        <h3>Install Snort:</h3>
+        
+        <p>Command:</p> 
+        <div class="code">$ sudo apt-get install snort</div>
+
+        <p>Once Snort is installed, it will ask you to set your network CIDR.  Most home networks are set to 192.168.0.1/24 but you may want to double
+            check how yours is configured.  Make sure that the CIDR is set correctly or you won't be able to sniff and be alerted to things going
+            on in your subnet.
+        </p>
+        <br/><br/>
+        <h3>Create a Snort.conf backup file:</h3>        
+        <center><image class="snortbak": image src="../Image/Snort/snortbackup.PNG"></center>  
+        <p>We want to create a backup of the configuration file just in case we corrupt the one that we are working with.  It takes the guessing
+            out of it if that happens.
+        </p>
+        <h3>Make an edit to snort.conf:</h3>
+        <div class="code">$ sudo gedit snort.conf</div>
+        <center><image class="snortbak": image src="../Image/Snort/snortbackup.PNG"></center>   
+        <p>Make sure that you modify the HOME_NET variable in the snort.conf file.  This tells snort that the HOME_NET is your IP address 
+            range. You can see the modification that I made to line 66 in the file.
+        </p>   
+        <center><image class="HOME_NET": image src="../Image/Snort/home_net.PNG"></center>   
+            
+
+
+
+        </p>
+        <hr>
+        </div>
+    </body>
+</html>
