@@ -19,7 +19,7 @@
         </nav>
         <div class="blog">
             <div class="date"></div>
-            <h2>SNORT: Let's monitor our home network (GUI)</h2>
+            <h2>SNORT: Monitoring made easy</h2>
 <p class="paragraph">Make it easier to tell if there is something malicious on your network!</p>
         <br/><br/>
                                         <center>Installing Snort and enabling Promiscuous Mode</center>
@@ -27,8 +27,12 @@
         <p>Command:</p>
         <div class="code">$ sudo ifconfig (eth0/NIC) promisc</div>
         <p>When you run this command you should see that your NIC has a new mode (picture below), promiscuous.  This allows the NIC
-            to sniff all traffic within the network. </p>
+            to sniff all traffic within the network. Also ensure that your virtual machine settings are set to bridged mode. NAT won't work as well.
+            I am using VMware Workstation 16 so yours may look a little different in the network settings.
+        
+        </p>
         <center><image class="promisc": image src="../Image/Snort/2-settingpromisc.PNG"></center>
+        <center><image class="promisc": image src="../Image/Snort/bridged.PNG"></image></center>
         <h3>Install Snort:</h3>
         
         <p>Command:</p> 
@@ -46,13 +50,85 @@
         </p>
         <h3>Make an edit to snort.conf:</h3>
         <div class="code">$ sudo gedit snort.conf</div>
+        <br/>
         <center><image class="snortbak": image src="../Image/Snort/snortbackup.PNG"></center>   
-        <p>Make sure that you modify the HOME_NET variable in the snort.conf file.  This tells snort that the HOME_NET is your IP address 
+        <p>Make sure that you modify the $HOME_NET variable in the snort.conf file.  This tells snort that the HOME_NET is your IP address 
             range. You can see the modification that I made to line 66 in the file.
         </p>   
-        <center><image class="HOME_NET": image src="../Image/Snort/home_net.PNG"></center>   
+        <center><image class="HOME_NET": image src="../Image/Snort/home_net.PNG"></center>  
+        <p>After this you will want to remove/keep any rule files that you want to be used in your SNORT configuration. Under section 7, there is 
+            a $RULE_PATH/local.rules file that will allow you to put your own custom rules in it. There are plenty of preconfigured rules underneath
+            as well.  I recommend that you remove them and build up from there.  If you start off with too many rule files you may not know what rule
+            is responsible for certain alerts.
+        </p> 
+        <center><image class="rules": image src="../Image/Snort/snort_rules.PNG"></center>
+            <p>As you can see, I kept two standard rules <italic>virus.rules & web-client.rules</italic>. These are not necessary rules
+            but they are good to have on a home network to be warned of any potential attacks on common vectors that may be used in the home
+            such as web browsers, etc.</p>
+        
+        <p>Next, you'll want to navigate (cd command) to the rules directory.  This is what the $RULE_PATH variable points to. The rules directory is in <bold>
+            /etc/snort/rules</bold>. Once you are there you can type the command:</p>
+            <div class="code">$ sudo gedit local.rules</div>
+        <p>The following note pad will appear:</p>
+        <center><image class="localrules": image src="../Image/Snort/localrules.PNG"></center>
+        <p>Take a look at line 8. This is a common alert that we can use to test our configuration. You can copy the alert and test it as well.
+            There are multiple triggers that you can use but we will be focusing on the <italic>alert </italic>function. 
+            Reading from left to right:</p>
+        <p><bold>Alert:</bold> alerts snort to any matching traffic.  You will see this traffic on the CLI when it matches.</p>
+        <p><bold>ICMP:</bold> This is protocol commonly used in the ping command. Snort will specifically looking for ping/ICMP traffic.</p>
+        <p><bold>any any:</bold>The first any stands for the source IP address. The second any stands for the source port.</p>
+        <p><bold>->:</bold>This represents the flow of traffic. For example, it is pointing to the destination address.</p>
+        <p><bold>$HOME_NET:</bold>This is the reason that we set the $HOME_NET variable in the snort.conf file.  This represents our 
+        home network of 192.168.0.0/24 as the destination network.</p>
+        <p><bold>any</bold>: This is the destination port.</p>
+        <p><bold>msg:</bold>This can be any message you would like. I would set it to something that relates to your custom alert so you are 
+        aware of what is happening when the alert appears on the CLI.</p>
+        <p><bold>sid:</bold>This is a number that you must generate as an ID for your alert.  Ensure that it is over the 100000 mark because the 
+        rules created by Snort and the community take up the first 100000.</p>
+        <p><bold>rev:</bold>This is just the revision number. For example, if you make any changes to this alert in the future, 
+            you can make it "rev: 2".</p>
+            <br/>
+                                            <center>Testing our configuration</center>
+        <p>Once you have saved your new alert in the <italic>local.rules </italic>file, you can exit and enter the following command:</p>
+        <div class="code">$ sudo snort -T -i (NIC name: mine is ens33) -c /etc/snort/snort.conf</div>
+        <p>You won't see anything cool happening yet but this is a tool that allows us to double check our configuration.  The -T switch
+            stands for TEST and will let you know of any misconfigurations before you actually launch Snort.  It's a cool debugging feature.
+            The -i switch just allows us to theoretically run the test on our network interface card, so make sure you include it. The -c switch 
+            allows us to include the rule configuration file in snort.conf.  This is the main file that the program will debug. If you have any errors
+            after running the command, please ensure that you fix them before moving forward.
+        </p>
+                                            <center>Last but not least: Running Snort!</center>
+        <p>Now that we have debugged our configuration, we can move forward and actually run Snort for the first time! It isn't all too much
+            different than the test command that we ran above. Below is a screenshot of the command:</p>
+            <center><image class="snortrun": image src="../Image/Snort/runningsnort.PNG"></center>
+        <p>Once you run this command, the cursor will move below and blink as if it is loading. Your screen isn't frozen, Snort is actually waiting
+            for traffic that matches your alert to pass by. As far as the switches go, the only two that are different are the -A and -q switches.
+            The -A switch allows us to turn Snort on in alert mode and the -q switch keeps the CLI quiet without bulking it up with banner and status
+            reports you may not need.</p>
             
+            <p>So now the question is, how can we generate some ICMP traffic? Thankfully, it's easy enough and
+            we can just ping another computer on the same subnet. Since our NIC is in promiscuous mode, it will pick it up. Don't fret,
+            you don't necessarily need another physical PC.  This is why we have VMware! Spin up another Ubuntu VM or whatever VM your heart fancies.
+            Now use the computer that you are hosting the two VMs on (mine is a Windows 10 device)and ping the newly created VM.  You should see
+            new alerts pop up on the Snort CLI. Heres a picture to give you an idea:
+            </p>
+            <center><image class="snortconc": image src="../Image/Snort/snortconclusion.PNG"></image></center>
+            <p>After I spun up my new VM and got it's IP address with the <bold>ifconfig</bold> command, I was able to ping it on my Windows
+            machine. As you can see, our Snort box picked the traffic up and alerted us:</p>
+            <center><image class="snortconc": image src="../Image/Snort/snortconclusion1.PNG"></image></center>
+            <p>In the far right two columns, you can see the IP addresses that were involved. The IP address on the left is my Windows
+                machine and the address on the right is our "victim" VM. You can see the ICMP responses as well. Although ICMP is not
+                always a wise decision to use as an alert on a large corporate network, it is good practice on our home networks before delving
+                deeper into custom rules or the community rules in the /etc/snort/rules directory.
+            </p>
 
+            <p>Now that you know the basics of Snort, you can set up your own rules and implement community based rules as well. Snort goes much
+                deeper than this excercise but it goes to show how powerful the tool can be.  If it is placed in-line, it can even be set up as an 
+                IPS. This isn't it for our Snort excercises though, I have plans to implement a GUI for this and I will be sending the Snort logs and 
+                alerts to Splunk, next. As cool as a CLI is, logs are usually a lot easier to dig through if there is a GUI involved. After setting that up
+                I will do a dive into the Security Onion Linux distribution (an open-source-loaded to the max security OS). This will give you plent of FREE 
+                security to implement at home and on any enterprise network!
+            </p>
 
 
         </p>
